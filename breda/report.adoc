@@ -88,8 +88,14 @@ Swap is een feature dat leidt tot inconstency, dit moet daarom afgezt worden.
 NOTE: Swap space in Linux is used when the amount of physical memory (RAM) is full. If the system needs more memory resources and the RAM is full, inactive pages in memory are moved to the swap space. While swap space can help machines with a small amount of RAM, it should not be considered a replacement for more RAM. Swap space is located on hard drives, which have a slower access time than physical memory.
 
 == kubepsray anaylises
+=== [red]#Tasks#
+* [x] cri-o
+* [x] hostfile
+* [ ] test
+* [ ] domcument
 
-==== [red]#CRI-O#
+
+=== [red]#CRI-O#
 change group_vars (inventory/<foldername>/group_vars)
 
 ==== all/all.yaml
@@ -112,3 +118,36 @@ container_manager: crio
 etcd_deployment_type: host # optionally and mutually exclusive with etcd_kubeadm_enabled
 ----
 
+=== [red]#hostfile#
+[source, yaml]
+----
+# ## Configure 'ip' variable to bind kubernetes services on a
+# ## different ip than the default iface
+# ## We should set etcd_member_name for etcd cluster. The node that is not a etcd member do not need to set the value, or can set the empty string value.
+[all]
+node1 ansible_host=135.181.196.89   ip=10.0.0.3 etcd_member_name=etcd1
+node2 ansible_host=135.181.196.90   ip=10.0.0.2 etcd_member_name=etcd2
+node3 ansible_host=135.181.196.83   ip=10.3.0.4 etcd_member_name=etcd3
+
+
+# ## configure a bastion host if your nodes are not directly reachable
+# bastion ansible_host=x.x.x.x ansible_user=some_user
+
+[kube-master]
+node1
+
+
+[etcd]
+node1
+
+
+[kube-node]
+node2
+node3
+[calico-rr]
+
+[k8s-cluster:children]
+kube-master
+kube-node
+calico-rr
+----

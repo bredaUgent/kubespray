@@ -1,4 +1,4 @@
-# Documentation of the cluster.
+# Documentation of the cluster
 
-ansible folder can be found [here](../inventory/cluterbreda)
+ansible folder can be found [here](https://github.com/bredaUgent/kubespray/tree/master/inventory/clusterbreda).
 

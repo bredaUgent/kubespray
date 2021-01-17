@@ -1,0 +1,114 @@
+= Kubernetes webserver
+Author Name <bram.breda@ugent.be>
+
+
+== prove of concept
+=== Manueel
+==== [red]#prerequisites#
+update all packages:
+[source, bash]
+----
+dnf upgrade
+----
+
+==== [red]#installing kubernetes#
+[source, bash]
+----
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kubelet kubeadm kubectl
+EOF
+
+# Set SELinux in permissive mode (effectively disabling it)
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+sudo systemctl enable --now kubelet
+----
+
+
+
+Disable swapp-off + comment out in fstab file:
+[source, bash]
+----
+swapoff -a
+
+vi /etc/fstab
+----
+
+==== [red]#Installing CRI-O#
+[source, bash]
+----
+
+----
+
+
+
+
+=== ansible
+==== [red]#hostfile#
+hostfile met 3 werknodes. Er is nog geen HA, hiervoor hebben we minstens 3 masters nodig.
+
+[source, yaml]
+----
+all:
+  children:
+    masters:
+      hosts:
+        master1:
+          ansible_host: 135.181.196.89
+          ansible_user: root
+    workers:
+      hosts:
+        worker1:
+          ansible_host: 135.181.196.90
+          ansible_user: root
+        worker2:
+          ansible_host: 135.181.196.83
+          ansible_user: root 
+----
+
+==== [red]#VM setup#
+Hier worden alle packages upgedate, en wordt swap-off afgelegd.
+
+[source, yaml]
+----
+----
+
+Swap is een feature dat leidt tot inconstency, dit moet daarom afgezt worden. 
+
+NOTE: Swap space in Linux is used when the amount of physical memory (RAM) is full. If the system needs more memory resources and the RAM is full, inactive pages in memory are moved to the swap space. While swap space can help machines with a small amount of RAM, it should not be considered a replacement for more RAM. Swap space is located on hard drives, which have a slower access time than physical memory.
+
+== kubepsray anaylises
+
+==== [red]#CRI-O#
+change group_vars (inventory/<foldername>/group_vars)
+
+==== all/all.yaml
+[source, yaml]
+----
+download_container: false
+skip_downloads: false
+etcd_kubeadm_enabled: true
+----
+
+==== k8s-cluster/k8s-cluster.yml
+[source, yaml]
+----
+container_manager: crio
+----
+
+==== etcd.yml
+[source, yaml]
+----
+etcd_deployment_type: host # optionally and mutually exclusive with etcd_kubeadm_enabled
+----
+

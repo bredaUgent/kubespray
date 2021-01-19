@@ -152,6 +152,16 @@ kube-node
 calico-rr
 ----
 
+=== [red]#internal network#
+[source, bash]
+----
+vi /etc/sysconfig/network-scripts/ifcfg-eth1
+
+DEVICE=eth1
+BOOTPROTO=dhcp
+ONBOOT=yes
+----
+
 === [red]#Test#
 [source, bash]
 ----
@@ -161,10 +171,6 @@ sudo pip3 install -r requirements.txt
 # Copy ``inventory/sample`` as ``inventory/mycluster``
 cp -rfp inventory/sample inventory/mycluster
 
-# Update Ansible inventory file with inventory builder
-declare -a IPS=( 135.181.196.89 135.181.196.90 135.181.196.89 )
-CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}
-
 # Review and change parameters under ``inventory/mycluster/group_vars``
 cat inventory/clusterbreda/group_vars/all/all.yml
 cat inventory/clusterbreda/group_vars/k8s-cluster/k8s-cluster.yml
@@ -173,5 +179,5 @@ cat inventory/clusterbreda/group_vars/k8s-cluster/k8s-cluster.yml
 # The option `--become` is required, as for example writing SSL keys in /etc/,
 # installing packages and interacting with various systemd daemons.
 # Without --become the playbook will fail to run!
-ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml
+ansible-playbook -i inventory/clusterbreda/inventory.ini  --become --become-user=root cluster.yml
 ----

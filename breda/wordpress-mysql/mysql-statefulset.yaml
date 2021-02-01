@@ -39,7 +39,7 @@ spec:
       name: mysql-pv-claim
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: standard
+      storageClassName: fast
       resources:
         requests:
           storage: 20Gi

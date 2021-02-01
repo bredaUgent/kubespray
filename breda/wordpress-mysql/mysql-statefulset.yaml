@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: wordpress-mysql
+  namespace: test
   labels:
     app: wordpress
 spec:
